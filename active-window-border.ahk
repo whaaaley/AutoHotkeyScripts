@@ -2,7 +2,7 @@
 
 ; Configuration
 BorderWidth := 2         ; Thickness of the border in pixels
-Offset := -2              ; Configurable offset for additional gap
+Offset := -2             ; Configurable offset for additional gap
 BorderColor := "FF8C00"  ; Orange color for the border
 TransparencyLevel := 255  ; Set transparency level (255 = fully opaque)
 
@@ -37,11 +37,13 @@ UpdateBorder() {
     try {
         hwnd := WinGetID("A")  ; Get the handle of the active window
     } catch {
-        return  ; Skip the update if no valid active window is found
+        HideBorders()  ; Hide borders if no active window is found
+        return
     }
 
     ; Skip the update if the active window is one of the border windows
     if !hwnd || hwnd = borderTop.Hwnd || hwnd = borderBottom.Hwnd || hwnd = borderLeft.Hwnd || hwnd = borderRight.Hwnd {
+        HideBorders()  ; Hide borders if the active window is one of the border windows
         return
     }
 
@@ -51,13 +53,15 @@ UpdateBorder() {
 
     ; Check if the process or window class is in the ignored list
     if IsProcessIgnored(ProcessName) || IsWindowClassIgnored(WindowClass) {
-        return  ; Skip the border update if the window is ignored
+        HideBorders()  ; Hide the borders if the window is ignored
+        return
     }
 
     ; Use GetWindowRect for precise window boundaries
     rect := Buffer(16)  ; Buffer for the RECT structure (4 * 4 bytes)
     if !DllCall("GetWindowRect", "Ptr", hwnd, "Ptr", rect) {
-        return  ; Skip the update if unable to get the window rectangle
+        HideBorders()  ; Hide the borders if unable to get the window rectangle
+        return
     }
 
     ; Extract x, y, w, h from the RECT structure
@@ -95,9 +99,17 @@ UpdateBorder() {
         (h - 7) + (BorderWidth * 2) + (Offset * 2)      ; Adjust height, accounting for the real Offset
     )
 
-    ; Ensure all the border windows stay always on top
+    ; Show the borders if they are not hidden
     for border in [borderTop, borderBottom, borderLeft, borderRight] {
         border.Opt("+AlwaysOnTop")
+        border.Show("NoActivate")  ; Ensure borders don't steal focus
+    }
+}
+
+; Function to hide the border windows
+HideBorders() {
+    for border in [borderTop, borderBottom, borderLeft, borderRight] {
+        border.Hide()  ; Hide the border window
     }
 }
 
@@ -137,10 +149,10 @@ GetProcessExeFromHwnd(hwnd) {
 ; Function to create a single border window
 CreateBorderWindow() {
     ; Create a transparent, click-through border window
-    borderGui := Gui("-Caption +ToolWindow +E0x20")  ; E0x20 for click-through
+    borderGui := Gui("-Caption +ToolWindow +E0x20")  ; E0x20 for click-through (WS_EX_TRANSPARENT)
     borderGui.BackColor := BorderColor
     borderGui.Opt("+LastFound")
-    borderGui.Show("x0 y0 w100 h100 NoActivate")
+    borderGui.Show("x0 y0 w100 h100 NoActivate")  ; Show window without activating it
 
     ; Apply transparency
     WinSetTransparent(TransparencyLevel, borderGui)
