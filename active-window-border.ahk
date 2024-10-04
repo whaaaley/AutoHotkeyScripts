@@ -3,7 +3,7 @@
 ; Configuration
 BorderWidth := 2          ; Thickness of the border in pixels
 Offset := -2              ; Configurable offset for additional gap
-BorderColor := "FF8C00" ; Orange color for the border
+BorderColor := "FF8C00"   ; Orange color for the border
 TransparencyLevel := 255  ; Set transparency level (255 = fully opaque)
 
 ; List of Ignored Processes
@@ -21,17 +21,15 @@ IgnoredWindowClasses := [
     "XamlExplorerHostIslandWindow", ; Ignore System Tray (Windows 11)
     "TopLevelWindowForOverflowXamlIsland", ; Ignore System Tray Overflow (Windows 11)
     "Windows.UI.Composition.DesktopWindowContentBridge1", ; Ignore additional system windows under the mouse
-    "Progman"                       ; Ignore Desktop
+    "Progman",                      ; Ignore Desktop (main desktop window)
+    "WorkerW"                       ; Ignore secondary desktop background window (behind desktop icons)
 ]
 
-; Create the four border windows
-borderTop := CreateBorderWindow()
-borderBottom := CreateBorderWindow()
-borderLeft := CreateBorderWindow()
-borderRight := CreateBorderWindow()
+; Create the four border windows in an array
+borders := [CreateBorderWindow(), CreateBorderWindow(), CreateBorderWindow(), CreateBorderWindow()]
 
 ; Continuously update the border around the active window
-SetTimer(UpdateBorder, 250)
+SetTimer(UpdateBorder, 100)
 
 ; Function to update the border around the active window
 UpdateBorder() {
@@ -42,15 +40,17 @@ UpdateBorder() {
         return
     }
 
-    ; Skip the update if the active window is one of the border windows
-    if !hwnd || hwnd = borderTop.Hwnd || hwnd = borderBottom.Hwnd || hwnd = borderLeft.Hwnd || hwnd = borderRight.Hwnd {
-        HideBorders()  ; Hide borders if the active window is one of the border windows
-        return
-    }
-
     ; Get the process name and window class of the active window
     ProcessName := GetProcessExeFromHwnd(hwnd)
     WindowClass := WinGetClass("ahk_id " hwnd)
+
+    ; Skip the update if the active window is one of the border windows
+    for border in borders {
+        if hwnd = border.Hwnd {
+            HideBorders()  ; Hide borders if the active window is one of the border windows
+            return
+        }
+    }
 
     ; Check if the process or window class is in the ignored list
     if IsProcessIgnored(ProcessName) || IsWindowClassIgnored(WindowClass) {
@@ -71,45 +71,29 @@ UpdateBorder() {
     w := NumGet(rect, 8, "Int") - x  ; right - left = width
     h := NumGet(rect, 12, "Int") - y  ; bottom - top = height
 
-    ; Apply a hardcoded 7px adjustment for alignment, then add the real configurable Offset
-    borderTop.Move(
-        (x + 7) - BorderWidth - Offset,                 ; Apply hardcoded 7px and configurable Offset
-        y - BorderWidth - Offset,                       ; Adjust Y for the top
-        (w - 14) + (BorderWidth * 2) + (Offset * 2),    ; Adjust width, accounting for the real Offset
-        BorderWidth                                    ; Height of the top border
-    )
+    ; Define variables for calculations with consistent naming
+    xLeft := x + 7 - BorderWidth - Offset  ; Left X position
+    xRight := x + w - 7 + Offset           ; Right X position
+    yTop := y - BorderWidth - Offset       ; Top Y position
+    yBottom := y + h - 7 + Offset          ; Bottom Y position
+    width := (w - 14) + (BorderWidth * 2) + (Offset * 2)   ; Width of top/bottom borders
+    height := (h - 7) + (BorderWidth * 2) + (Offset * 2)   ; Height of left/right borders
 
-    borderBottom.Move(
-        (x + 7) - BorderWidth - Offset,                 ; Apply hardcoded 7px and configurable Offset
-        y + h - 7 + Offset,                             ; Adjust Y for the bottom border
-        (w - 14) + (BorderWidth * 2) + (Offset * 2),    ; Adjust width, accounting for the real Offset
-        BorderWidth                                    ; Height of the bottom border
-    )
+    ; Move the borders accordingly using the pre-calculated variables
+    borders[1].Move(xLeft, yTop, width, BorderWidth)    ; Top border (horizontal)
+    borders[2].Move(xLeft, yBottom, width, BorderWidth) ; Bottom border (horizontal)
+    borders[3].Move(xLeft, yTop, BorderWidth, height)   ; Left border (vertical)
+    borders[4].Move(xRight, yTop, BorderWidth, height)  ; Right border (vertical)
 
-    borderLeft.Move(
-        (x + 7) - BorderWidth - Offset,                 ; Apply hardcoded 7px and configurable Offset
-        y - BorderWidth - Offset,                       ; Adjust Y for the left border
-        BorderWidth,                                    ; Width of the left border
-        (h - 7) + (BorderWidth * 2) + (Offset * 2)      ; Adjust height, accounting for the real Offset
-    )
-
-    borderRight.Move(
-        x + w - 7 + Offset,                             ; Apply hardcoded 7px and configurable Offset
-        y - BorderWidth - Offset,                       ; Adjust Y for the right border
-        BorderWidth,                                    ; Width of the right border
-        (h - 7) + (BorderWidth * 2) + (Offset * 2)      ; Adjust height, accounting for the real Offset
-    )
-
-    ; Show the borders if they are not hidden
-    for border in [borderTop, borderBottom, borderLeft, borderRight] {
-        border.Opt("+AlwaysOnTop")
+    ; Show the borders
+    for border in borders {
         border.Show("NoActivate")  ; Ensure borders don't steal focus
     }
 }
 
 ; Function to hide the border windows
 HideBorders() {
-    for border in [borderTop, borderBottom, borderLeft, borderRight] {
+    for border in borders {
         border.Hide()  ; Hide the border window
     }
 }
@@ -118,7 +102,7 @@ HideBorders() {
 IsProcessIgnored(ProcessName) {
     global IgnoredProcesses
     for process in IgnoredProcesses {
-        if (process = ProcessName) {
+        if (ProcessName = process) {
             return true
         }
     }
@@ -129,7 +113,7 @@ IsProcessIgnored(ProcessName) {
 IsWindowClassIgnored(WindowClass) {
     global IgnoredWindowClasses
     for class in IgnoredWindowClasses {
-        if (class = WindowClass) {
+        if (WindowClass = class) {
             return true
         }
     }
@@ -142,7 +126,7 @@ GetProcessExeFromHwnd(hwnd) {
     try {
         ProcessPath := ProcessGetPath(ProcessID)  ; Attempt to get the full path of the process executable
     } catch {
-        return "Access Denied"  ; Return 'Access Denied' if an error occurs
+        return ""  ; Return an empty string if an error occurs
     }
     return StrSplit(ProcessPath, "\").Pop()  ; Extract and return just the executable name
 }
@@ -152,7 +136,7 @@ CreateBorderWindow() {
     ; Create a transparent, click-through border window
     borderGui := Gui("-Caption +ToolWindow +E0x20")  ; E0x20 for click-through (WS_EX_TRANSPARENT)
     borderGui.BackColor := BorderColor
-    borderGui.Opt("+LastFound")
+    borderGui.Opt("+LastFound +AlwaysOnTop")  ; Set always-on-top once during creation
     borderGui.Show("x0 y0 w100 h100 NoActivate")  ; Show window without activating it
 
     ; Apply transparency
