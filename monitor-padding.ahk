@@ -1,11 +1,10 @@
 #Requires AutoHotkey v2.0
 
-; This script creates 32px black bars on all sides (top, bottom, left, and right) of Monitor 1 and Monitor 2.
-; It reserves 32px on all sides of each monitor separately, so maximized windows don't overlap the bars.
+; This script creates 36px black bars on all sides (top, bottom, left, and right) of Monitor 1 and Monitor 2.
+; It reserves 36px on all sides of each monitor separately, so maximized windows don't overlap the bars.
 ; The script restores the original work areas upon exit and includes error handling.
 
-; === Configuration ===
-
+; Configuration
 BAR_SIZE := 36  ; The size (thickness) of each bar on each side
 
 ; Define monitor positions and sizes manually
@@ -13,11 +12,10 @@ BAR_SIZE := 36  ; The size (thickness) of each bar on each side
 ; Example setup:
 ; - Monitor 2 (Primary) is on the left: 2560x1440 at position (0,0)
 ; - Monitor 1 (Secondary) is on the right: 2560x1440 at position (2560,0)
-
 monitor2 := { left: 0, top: 0, width: 2560, height: 1440 }      ; Primary Monitor (Monitor 2)
 monitor1 := { left: 2560, top: 0, width: 2560, height: 1440 }   ; Secondary Monitor (Monitor 1)
 
-; === Function to create black bars on all sides ===
+; Function to create black bars on all sides of a monitor
 CreateBarsForMonitor(monitor) {
     global BAR_SIZE
     bars := []
@@ -25,10 +23,10 @@ CreateBarsForMonitor(monitor) {
     ; Create top bar
     barTop := Gui("+AlwaysOnTop -Caption +ToolWindow")
     barTop.BackColor := "Black"
-    barTop.Show(Format("x{1} y{2} w{3} h{4}", monitor.left, monitor.top 0, monitor.width, BAR_SIZE))
+    barTop.Show(Format("x{1} y{2} w{3} h{4}", monitor.left, monitor.top, monitor.width, BAR_SIZE))
     WinSetTransparent(0, barTop)
-    WinSetExStyle("+0x20", barTop)
-    WinSetExStyle("+0x80000", barTop)
+    WinSetExStyle("+0x20", barTop)      ; Make the GUI click-through
+    WinSetExStyle("+0x80000", barTop)   ; Prevent activation on click
     bars.Push(barTop)
 
     ; Create bottom bar
@@ -61,7 +59,7 @@ CreateBarsForMonitor(monitor) {
     return bars
 }
 
-; === Function to reserve space on all sides of the screen for a specific monitor ===
+; Function to reserve space on all sides of the screen for a specific monitor
 ReserveWorkAreaForMonitor(monitor) {
     global BAR_SIZE
 
@@ -93,8 +91,7 @@ ReserveWorkAreaForMonitor(monitor) {
     return workArea  ; Return the original work area for restoration
 }
 
-; === Create Black Bars for Both Monitors ===
-
+; Create Black Bars for Both Monitors
 barsMonitor2 := CreateBarsForMonitor(monitor2)  ; Create bars for Monitor 2 (Primary)
 barsMonitor1 := CreateBarsForMonitor(monitor1)  ; Create bars for Monitor 1 (Secondary)
 
@@ -102,13 +99,11 @@ barsMonitor1 := CreateBarsForMonitor(monitor1)  ; Create bars for Monitor 1 (Sec
 originalWorkArea1 := ReserveWorkAreaForMonitor(monitor1)  ; Reserve work area for Monitor 1
 originalWorkArea2 := ReserveWorkAreaForMonitor(monitor2)  ; Reserve work area for Monitor 2
 
-; === Keep the Script Running and Handle Exit ===
-
-; Register the exit handler to restore the original work areas
+; Keep the Script Running and Handle Exit
 OnExit(ExitFunc)
 return
 
-; === Exit Handler Function to Restore the Original Work Areas ===
+; Exit Handler Function to Restore the Original Work Areas
 ExitFunc(ExitReason, ExitCode) {
     global originalWorkArea1, originalWorkArea2
 
