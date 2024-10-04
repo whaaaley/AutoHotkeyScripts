@@ -47,9 +47,10 @@ Creates a transparent, click-through window that serves as the border.
 3. Add or modify the list of ignored processes or window classes if needed.
 4. Run the script to apply a border to any active window that is not on the ignored list.
 
-### Known Issues:
-- **Work Area Orange Square on Start**: On startup, a small orange square may appear in the corner of the work area. This issue will go away once you interact with a window.
+### Known Issues
+- **Work Area Orange Square on Start**: A small orange square may appear in the corner of the work area on startup. This issue will go away once you interact with a window.
 - **Elevated Windows**: Elevated windows (e.g., those running with administrative privileges) will return `"Access Denied"` when trying to retrieve the process name, causing the border to be skipped for those windows.
+- **Border Above Context Menus**: The border may appear above context menus, system popups, or other elevated UI elements, which may occasionally cause confusion when the border overlaps these UI elements.
 
 ---
 
