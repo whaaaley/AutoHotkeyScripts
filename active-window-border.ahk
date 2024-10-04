@@ -8,8 +8,9 @@ TransparencyLevel := 255  ; Set transparency level (255 = fully opaque)
 
 ; List of Ignored Processes
 IgnoredProcesses := [
-    "Flow.Launcher.exe",         ; Ignore Flow Launcher
-    "ShellExperienceHost.exe"    ; Ignore Windows shell (Start Menu)
+    "Flow.Launcher.exe",       ; Ignore Flow Launcher
+    "ShellExperienceHost.exe", ; Ignore Windows shell (Start Menu)
+    "Rainmeter.exe"            ; Ignore Rainmeter
 ]
 
 ; List of Ignored Window Classes
