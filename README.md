@@ -50,8 +50,6 @@ Creates a transparent, click-through window that serves as the border.
 ### Known Issues
 - **Work Area Orange Square on Start**: A small orange square may appear in the corner of the work area on startup. This issue will go away once you interact with a window.
 - **Elevated Windows**: Elevated windows (e.g., those running with administrative privileges) will return `"Access Denied"` when trying to retrieve the process name, causing the border to be skipped for those windows.
-- **Border Above Context Menus**: The border may appear above context menus, system popups, or other elevated UI elements, which may occasionally cause confusion when the border overlaps these UI elements.
-- **Desktop Switching**: When switching desktops, the border remains in the last known position, meaning it will persist until a new window is focused.
 
 ---
 
