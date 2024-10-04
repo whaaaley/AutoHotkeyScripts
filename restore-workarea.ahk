@@ -2,7 +2,7 @@
 
 ; This script restores the work area to encompass the full screen on all monitors (no reserved space).
 
-; === Function to Restore Work Area for a Monitor ===
+; Function to restore the work area for a specific monitor
 RestoreWorkAreaForMonitor(hMonitor) {
     ; Get monitor information
     MONITORINFO := Buffer(40, 0)
@@ -36,20 +36,19 @@ RestoreWorkAreaForMonitor(hMonitor) {
     }
 }
 
-; === Function to Restore Work Area for All Monitors ===
+; Function to restore the work area for all monitors
 RestoreWorkArea() {
     ; Enumerate monitors and restore the work area for each
-    ; EnumDisplayMonitors is used to go through each monitor
     DllCall("EnumDisplayMonitors", "Ptr", 0, "Ptr", 0, "Ptr", CallbackCreate(EnumMonitors), "Ptr", 0)
 }
 
-; === Callback for EnumDisplayMonitors ===
+; Callback function for EnumDisplayMonitors
 EnumMonitors(hMonitor, hdcMonitor, lprcMonitor, dwData) {
     ; Restore the work area for each monitor
     RestoreWorkAreaForMonitor(hMonitor)
     return true  ; Continue enumeration
 }
 
-; === Execute the Restore Function ===
+; Execute the RestoreWorkArea function
 RestoreWorkArea()
 ExitApp()
