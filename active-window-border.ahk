@@ -9,7 +9,6 @@ TransparencyLevel := 255  ; Set transparency level (255 = fully opaque)
 ; List of Ignored Processes
 IgnoredProcesses := [
     "Flow.Launcher.exe",         ; Ignore Flow Launcher
-    "ApplicationFrameHost.exe",  ; Ignore Microsoft Store and other UWP apps
     "ShellExperienceHost.exe"    ; Ignore Windows shell (Start Menu)
 ]
 
