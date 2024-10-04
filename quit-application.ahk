@@ -1,15 +1,21 @@
 ﻿#Requires AutoHotkey v2.0
 
-^q::  ; Ctrl+Q hotkey
+; Ctrl+Q hotkey to close the active window after confirmation
+^q::
 {
-    active_id := WinExist("A")  ; Get the active window ID
-    Title := WinGetTitle("ahk_id " . active_id)  ; Get the title of the active window
+    ; Get the active window ID
+    active_id := WinExist("A")
 
-    ; Confirmation dialog with Yes and No buttons
-    result := MsgBox("Are you sure you want to close " . Title . "?", "Your Title", "YesNo")
+    ; Get the title of the active window
+    Title := WinGetTitle("ahk_id " . active_id)
 
-    if (result = "Yes")  ; Check if the user pressed 'Yes'
+    ; Display a confirmation dialog with Yes and No buttons
+    result := MsgBox("Are you sure you want to close " . Title . "?", "Confirm Close", "YesNo")
+
+    ; Check if the user pressed 'Yes' to close the window
+    if (result = "Yes") {
         WinClose("ahk_id " . active_id)  ; Close the active window
+    }
 
     return
 }
