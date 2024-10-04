@@ -127,7 +127,11 @@ IsWindowClassIgnored(WindowClass) {
 ; === Function to get the process executable name from the window handle ===
 GetProcessExeFromHwnd(hwnd) {
     ProcessID := WinGetPID("ahk_id " hwnd)  ; Get the Process ID from the window handle
-    ProcessPath := ProcessGetPath(ProcessID)  ; Get the full path of the process executable
+    try {
+        ProcessPath := ProcessGetPath(ProcessID)  ; Attempt to get the full path of the process executable
+    } catch {
+        return "Access Denied"  ; Return 'Access Denied' if an error occurs
+    }
     return StrSplit(ProcessPath, "\").Pop()  ; Extract and return just the executable name
 }
 
