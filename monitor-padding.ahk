@@ -10,12 +10,14 @@ monitor1 := { left: 2560, top: 0, width: 2560, height: 1440 }  ; Secondary Monit
 
 ; Function to create a bar on the screen
 createBar(x, y, w, h) {
-    bar := Gui("+AlwaysOnTop -Caption +ToolWindow")
-    bar.Show(Format("x{1} y{2} w{3} h{4}", x, y, w, h))
+    ; Create a frameless, click-through GUI window
+    bar := Gui("-Caption +ToolWindow +E0x20")
 
-    WinSetTransparent(0, bar)       ; Make the GUI transparent
-    WinSetExStyle("+0x20", bar)     ; Make the GUI click-through
-    WinSetExStyle("+0x80000", bar)  ; Prevent activation on click
+    ; Make the window fully transparent
+    WinSetTransparent(0, bar)
+
+    ; Show the bar at the specified position and size, without activating it
+    bar.Show(Format("x{1} y{2} w{3} h{4} NoActivate", x, y, w, h))
 
     return bar
 }
