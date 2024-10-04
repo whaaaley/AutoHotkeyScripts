@@ -1,9 +1,9 @@
 #Requires AutoHotkey v2.0
 
 ; Configuration
-BorderWidth := 2         ; Thickness of the border in pixels
-Offset := -2             ; Configurable offset for additional gap
-BorderColor := "FF8C00"  ; Orange color for the border
+BorderWidth := 2          ; Thickness of the border in pixels
+Offset := -2              ; Configurable offset for additional gap
+BorderColor := "FF8C00" ; Orange color for the border
 TransparencyLevel := 255  ; Set transparency level (255 = fully opaque)
 
 ; List of Ignored Processes
@@ -31,7 +31,7 @@ borderLeft := CreateBorderWindow()
 borderRight := CreateBorderWindow()
 
 ; Continuously update the border around the active window
-SetTimer(UpdateBorder, 100)
+SetTimer(UpdateBorder, 250)
 
 ; Function to update the border around the active window
 UpdateBorder() {
