@@ -1,28 +1,28 @@
 #Requires AutoHotkey v2.0
 
-; === Configuration ===
+; Configuration
 BorderWidth := 2         ; Thickness of the border in pixels
 Offset := 6              ; Configurable offset for additional gap
 BorderColor := "FF8C00"  ; Orange color for the border
 TransparencyLevel := 255  ; Set transparency level (255 = fully opaque)
 
-; === List of Ignored Processes ===
+; List of Ignored Processes
 IgnoredProcesses := [
-    "Flow.Launcher.exe",         ; Ignoring Flow Launcher
-    "ApplicationFrameHost.exe",  ; Ignoring Microsoft Store and other UWP apps
-    "ShellExperienceHost.exe"    ; Ignoring Windows shell (Start Menu)
+    "Flow.Launcher.exe",         ; Ignore Flow Launcher
+    "ApplicationFrameHost.exe",  ; Ignore Microsoft Store and other UWP apps
+    "ShellExperienceHost.exe"    ; Ignore Windows shell (Start Menu)
 ]
 
+; List of Ignored Window Classes
 IgnoredWindowClasses := [
-    "Windows.UI.Core.CoreWindow",   ; Ignoring Start Menu
-    "Shell_TrayWnd",                ; Ignoring Taskbar
-    "NotifyIconOverflowWindow",     ; Ignoring System Tray (Windows 10)
-    "XamlExplorerHostIslandWindow", ; Previously thought to ignore System Tray (Windows 11)
-    "TopLevelWindowForOverflowXamlIsland", ; Ignoring System Tray Overflow (Windows 11)
-    "Windows.UI.Composition.DesktopWindowContentBridge1", ; Additional class found under mouse
-    "Progman"                       ; Ignoring Desktop
+    "Windows.UI.Core.CoreWindow",   ; Ignore Start Menu
+    "Shell_TrayWnd",                ; Ignore Taskbar
+    "NotifyIconOverflowWindow",     ; Ignore System Tray (Windows 10)
+    "XamlExplorerHostIslandWindow", ; Ignore System Tray (Windows 11)
+    "TopLevelWindowForOverflowXamlIsland", ; Ignore System Tray Overflow (Windows 11)
+    "Windows.UI.Composition.DesktopWindowContentBridge1", ; Ignore additional system windows under the mouse
+    "Progman"                       ; Ignore Desktop
 ]
-
 
 ; Create the four border windows
 borderTop := CreateBorderWindow()
@@ -33,15 +33,15 @@ borderRight := CreateBorderWindow()
 ; Continuously update the border around the active window
 SetTimer(UpdateBorder, 100)
 
-; === Function to update the border around the active window ===
+; Function to update the border around the active window
 UpdateBorder() {
     try {
         hwnd := WinGetID("A")  ; Get the handle of the active window
     } catch {
-        return  ; If no valid active window is found, skip the update
+        return  ; Skip the update if no valid active window is found
     }
 
-    ; Skip update if the active window is one of the border windows
+    ; Skip the update if the active window is one of the border windows
     if !hwnd || hwnd = borderTop.Hwnd || hwnd = borderBottom.Hwnd || hwnd = borderLeft.Hwnd || hwnd = borderRight.Hwnd {
         return
     }
@@ -52,13 +52,13 @@ UpdateBorder() {
 
     ; Check if the process or window class is in the ignored list
     if IsProcessIgnored(ProcessName) || IsWindowClassIgnored(WindowClass) {
-        return  ; If it's ignored, skip the border update
+        return  ; Skip the border update if the window is ignored
     }
 
     ; Use GetWindowRect for precise window boundaries
     rect := Buffer(16)  ; Buffer for the RECT structure (4 * 4 bytes)
     if !DllCall("GetWindowRect", "Ptr", hwnd, "Ptr", rect) {
-        return  ; If we fail to get the window rectangle, skip the update
+        return  ; Skip the update if unable to get the window rectangle
     }
 
     ; Extract x, y, w, h from the RECT structure
@@ -67,7 +67,7 @@ UpdateBorder() {
     w := NumGet(rect, 8, "Int") - x  ; right - left = width
     h := NumGet(rect, 12, "Int") - y  ; bottom - top = height
 
-    ; Apply hardcoded 7px adjustment for alignment, then add the real configurable Offset
+    ; Apply a hardcoded 7px adjustment for alignment, then add the real configurable Offset
     borderTop.Move(
         (x + 7) - BorderWidth - Offset,                 ; Apply hardcoded 7px and configurable Offset
         y - BorderWidth - Offset,                       ; Adjust Y for the top
@@ -102,7 +102,7 @@ UpdateBorder() {
     }
 }
 
-; === Function to check if the process is ignored ===
+; Function to check if the process is ignored
 IsProcessIgnored(ProcessName) {
     global IgnoredProcesses
     for process in IgnoredProcesses {
@@ -113,7 +113,7 @@ IsProcessIgnored(ProcessName) {
     return false
 }
 
-; === Function to check if the window class is ignored ===
+; Function to check if the window class is ignored
 IsWindowClassIgnored(WindowClass) {
     global IgnoredWindowClasses
     for class in IgnoredWindowClasses {
@@ -124,7 +124,7 @@ IsWindowClassIgnored(WindowClass) {
     return false
 }
 
-; === Function to get the process executable name from the window handle ===
+; Function to get the process executable name from the window handle
 GetProcessExeFromHwnd(hwnd) {
     ProcessID := WinGetPID("ahk_id " hwnd)  ; Get the Process ID from the window handle
     try {
@@ -135,7 +135,7 @@ GetProcessExeFromHwnd(hwnd) {
     return StrSplit(ProcessPath, "\").Pop()  ; Extract and return just the executable name
 }
 
-; === Function to create a single border window ===
+; Function to create a single border window
 CreateBorderWindow() {
     ; Create a transparent, click-through border window
     borderGui := Gui("-Caption +ToolWindow +E0x20")  ; E0x20 for click-through
