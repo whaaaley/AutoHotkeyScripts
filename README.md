@@ -1,4 +1,4 @@
-# AutoHotkeyMods
+# AutoHotkeyScripts
 My personal AHK scripts
 
 ## Legend
