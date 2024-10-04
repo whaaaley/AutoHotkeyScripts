@@ -30,16 +30,16 @@ This script adds a 2px orange square border around the active window with 100% o
 
 ### Functions:
 1. **`UpdateBorder()`**:
-   Continuously checks for changes in the active window and updates the border accordingly. Excludes processes and windows from the update if they belong to the ignored lists.
+Continuously checks for changes in the active window and updates the border accordingly. Excludes processes and windows from the update if they belong to the ignored lists.
 
 2. **`GetProcessExeFromHwnd(hwnd)`**:
-   Retrieves the executable name of the active window's process. Returns `"Access Denied"` if the process cannot be accessed due to elevated permissions.
+Retrieves the executable name of the active window's process. Returns `"Access Denied"` if the process cannot be accessed due to elevated permissions.
 
 3. **`IsProcessIgnored()` and `IsWindowClassIgnored()`**:
-   Check if the active window belongs to the ignored processes or window classes.
+Check if the active window belongs to the ignored processes or window classes.
 
 4. **`CreateBorderWindow()`**:
-   Creates a transparent, click-through window that serves as the border.
+Creates a transparent, click-through window that serves as the border.
 
 ### Usage:
 1. Ensure AutoHotkey v2.0 is installed.
@@ -48,34 +48,40 @@ This script adds a 2px orange square border around the active window with 100% o
 4. Run the script to apply a border to any active window that is not on the ignored list.
 
 ### Known Issues:
-- Elevated windows (e.g., those running with administrative privileges) will return `"Access Denied"` when trying to retrieve the process name, causing the border to be skipped for those windows.
+- **Work Area Orange Square on Start**: On startup, a small orange square may appear in the corner of the work area. This issue will go away once you interact with a window.
+- **Elevated Windows**: Elevated windows (e.g., those running with administrative privileges) will return `"Access Denied"` when trying to retrieve the process name, causing the border to be skipped for those windows.
 
 ---
 
 ## close-active-window.ahk
 
 **Description**:
-This script provides a hotkey (`Ctrl+Q`) that prompts the user with a confirmation dialog before closing the active window. It retrieves the window's title and displays it in the confirmation dialog to ensure the user knows which window is about to be closed.
+This script provides a hotkey (`Ctrl+Q`) that prompts the user with a confirmation dialog before closing the active window. It retrieves the window's title and displays it in the confirmation dialog. If the window title can't be retrieved, it defaults to a generic message.
 
 ### Features:
 - **Hotkey**: `Ctrl+Q` to trigger the window close confirmation.
 - **Confirmation Dialog**: Ensures the user doesn't accidentally close the window by asking for confirmation.
-- **Displays Active Window Title**: Shows the title of the window in the confirmation dialog.
+- **Displays Active Window Title**: Shows the title of the window in the confirmation dialog. If the title can't be retrieved, it displays "this window" as a fallback.
 
 ### Functions:
 1. **`^q::`**:
-   This hotkey function is triggered by `Ctrl+Q`:
-   - Retrieves the active window's title using `WinGetTitle`.
-   - Displays a confirmation dialog using `MsgBox` with Yes and No buttons.
-   - If the user selects **Yes**, the window is closed via `WinClose`.
+This hotkey function is triggered by `Ctrl+Q`:
+- Retrieves the active window's title using `WinGetTitle`.
+- Displays a confirmation dialog using `MsgBox` with Yes and No buttons.
+- If the user selects **Yes**, the window is closed via `WinClose`.
+
+2. **`GetWindowTitle(hwnd)`**:
+This function retrieves the window title. If it can't access the title (e.g., due to elevated permissions or the window being untitled), it returns `"this window"` as a fallback.
 
 ### Usage:
 1. Ensure AutoHotkey v2.0 is installed.
-2. Assign this script to a hotkey (`Ctrl+Q` is used by default).
-3. Press `Ctrl+Q` to trigger a confirmation prompt before closing the active window.
+2. Press `Ctrl+Q` to trigger a confirmation prompt before closing the active window. The window title will be displayed if available.
 
 ### Known Issues:
-- If the active window doesn't have a valid title, the confirmation message might not display the window's name correctly.
+- **Fallback for Untitled or Elevated Windows**:
+If the active window doesn't have a valid title (e.g., if it's a system window or process without a clear title), the confirmation dialog will display the fallback message `"this window"`. This might cause some confusion about which window is being closed.
+- **Handling Elevated Windows**:
+The confirmation dialog will appear for elevated windows (e.g., those running with administrative privileges), but the script will be unable to close them due to system permission restrictions. To allow the script to close elevated windows, you must run it with administrative privileges by right-clicking the script and selecting **"Run as Administrator"**.
 
 ---
 
@@ -96,13 +102,13 @@ This script creates 36px black padding on all sides (top, bottom, left, and righ
 
 ### Functions:
 1. **`CreateBarsForMonitor()`**:
-   Creates black padding for all sides (top, bottom, left, and right) for a given monitor.
+Creates black padding for all sides (top, bottom, left, and right) for a given monitor.
 
 2. **`ReserveWorkAreaForMonitor()`**:
-   Adjusts the work area to reserve space for the black padding.
+Adjusts the work area to reserve space for the black padding.
 
 3. **`ExitFunc()`**:
-   When the script exits, this function restores the original work area and removes the black padding.
+When the script exits, this function restores the original work area and removes the black padding.
 
 ### Usage:
 1. Ensure AutoHotkey v2.0 is installed.
@@ -111,7 +117,8 @@ This script creates 36px black padding on all sides (top, bottom, left, and righ
 4. The original work area will be restored when the script exits.
 
 ### Known Issues:
-- The script needs to be updated manually to reflect changes in monitor configurations if they differ from the pre-set values.
+- **Delayed Work Area Update on Start**: The reserved work area (padding) will not update immediately. The update will typically happen after interacting with the desktop or moving a window.
+- **Manual Updates**: The script needs to be manually updated to reflect changes in monitor configurations if they differ from the pre-set values.
 
 ---
 
@@ -126,13 +133,13 @@ This script restores the work area to encompass the full screen on all monitors 
 
 ### Functions:
 1. **`RestoreWorkAreaForMonitor(hMonitor)`**:
-   Restores the work area for an individual monitor by retrieving its full screen dimensions and applying them.
+Restores the work area for an individual monitor by retrieving its full screen dimensions and applying them.
 
 2. **`RestoreWorkArea()`**:
-   Detects all monitors connected to the system and restores the work area for each one.
+Detects all monitors connected to the system and restores the work area for each one.
 
 3. **`EnumMonitors(hMonitor, hdcMonitor, lprcMonitor, dwData)`**:
-   Callback function used to enumerate all monitors and call `RestoreWorkAreaForMonitor()` for each.
+Callback function used to enumerate all monitors and call `RestoreWorkAreaForMonitor()` for each.
 
 ### Usage:
 1. Ensure AutoHotkey v2.0 is installed.
