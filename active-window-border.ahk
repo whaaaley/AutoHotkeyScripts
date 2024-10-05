@@ -3,7 +3,7 @@
 ; Configuration
 BorderWidth := 2          ; Thickness of the border in pixels
 Offset := -2              ; Configurable offset for additional gap
-BorderColor := "FF8C00"   ; Orange color for the border
+BorderColor := "ffa83c"   ; Orange color for the border
 TransparencyLevel := 255  ; Set transparency level (255 = fully opaque)
 
 ; List of Ignored Processes
