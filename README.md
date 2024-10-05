@@ -8,36 +8,50 @@
 
 ## active-window-border.ahk
 
-This script adds a 2px orange square border around the active window with 100% opacity. The border dynamically updates its size and position whenever the active window changes. The borders are completely click-through and always stay on top of other windows.
+This script adds a configurable border around the active window. The border dynamically updates its size and position whenever the active window changes. The borders are completely click-through and always stay on top of other windows.
 
 ### Features:
 - **Dynamic Border**: Automatically adjusts around the active window.
 - **Always on Top**: Ensures that the border remains visible above all other windows.
 - **Click-Through**: Does not interfere with window interaction.
 - **Ignored Processes/Windows**: Excludes specific processes and window classes from showing borders.
+- **Configurable**: Easily adjust border properties like width, color, and transparency.
 
 ### Configuration:
-- `BorderWidth`: Thickness of the border in pixels. Default is `2px`.
-- `Offset`: Additional gap between the window and the border. Default is `6px`.
-- `BorderColor`: Color of the border in hexadecimal format. Default is `#FF8C00` (orange).
-- `TransparencyLevel`: Transparency level of the border (0 = fully transparent, 255 = fully opaque). Default is `255` (fully opaque).
+BorderWidth := 2              ; Thickness of the border in pixels
+Offset := -2                  ; Configurable offset for additional gap
+BorderColor := "ffa83c"       ; Border color in hexadecimal format (default: orange)
+TransparencyLevel := 255      ; Set transparency level (255 = fully opaque)
+DisableWhileDragging := true  ; Disable borders while dragging (default: true)
 
 ### Ignored Processes and Window Classes:
-- **Ignored Processes**: Windows or applications that should not display the border. This includes processes like `Flow.Launcher.exe` and `ApplicationFrameHost.exe` by default.
+- **Ignored Processes**: Windows or applications that should not display the border. This includes processes like `Flow.Launcher.exe`, `ShellExperienceHost.exe`, and `Rainmeter.exe` by default.
 - **Ignored Window Classes**: Specific window classes that are excluded from the border, such as system elements like the **Taskbar**, **Start Menu**, and **System Tray**.
 
 ### Functions:
 1. **`UpdateBorder()`**:
 Continuously checks for changes in the active window and updates the border accordingly. Excludes processes and windows from the update if they belong to the ignored lists.
 
-2. **`GetProcessExeFromHwnd(hwnd)`**:
-Retrieves the executable name of the active window's process. Returns `"Access Denied"` if the process cannot be accessed due to elevated permissions.
+2. **`ResetState()`**:
+Resets the state and hides the borders when no valid window is active or an ignored window is detected.
 
-3. **`IsProcessIgnored()` and `IsWindowClassIgnored()`**:
-Check if the active window belongs to the ignored processes or window classes.
+3. **`HideBorders()`**:
+Hides all border windows.
 
-4. **`CreateBorderWindow()`**:
+4. **`IsProcessIgnored(ProcessName)`**:
+Checks if the given process name is in the list of ignored processes.
+
+5. **`IsWindowClassIgnored(WindowClass)`**:
+Checks if the given window class is in the list of ignored window classes.
+
+6. **`GetProcessExeFromHwnd(hwnd)`**:
+Retrieves the executable name of the active window's process.
+
+7. **`CreateBorderWindow()`**:
 Creates a transparent, click-through window that serves as the border.
+
+8. **`GetWindowRect(hwnd)`**:
+Retrieves the exact dimensions of a window using the Windows API.
 
 ### Usage:
 1. Ensure AutoHotkey v2.0 is installed.
