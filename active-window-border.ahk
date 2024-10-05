@@ -29,6 +29,8 @@ IgnoredWindowClasses := [
 ; Declare global variables
 global moving := false
 global prevHwnd := 0
+global prevX := 0
+global prevY := 0
 
 ; Create the four border windows in an array
 borders := [
@@ -41,7 +43,7 @@ SetTimer(UpdateBorder, 100)
 
 ; Function to update the border around the active window
 UpdateBorder() {
-    global moving, prevHwnd, DisableWhileDragging  ; Access global variables
+    global moving, prevHwnd, prevX, prevY, DisableWhileDragging  ; Access global variables
 
     try {
         hwnd := WinGetID("A")  ; Get the handle of the active window
@@ -121,12 +123,14 @@ UpdateBorder() {
 
 ; Function to reset state and hide borders
 ResetState() {
-    global moving, prevHwnd
+    global moving, prevHwnd, prevX, prevY
 
     HideBorders()
 
     moving := false
     prevHwnd := 0
+    prevX := 0
+    prevY := 0
 
     return
 }
