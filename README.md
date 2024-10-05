@@ -1,5 +1,4 @@
 # AutoHotkeyScripts
-My personal AHK scripts
 
 ## Legend
 - [active-window-border.ahk](#active-window-borderahk)
