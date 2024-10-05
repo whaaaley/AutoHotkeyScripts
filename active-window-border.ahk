@@ -1,10 +1,11 @@
 #Requires AutoHotkey v2.0
 
 ; Configuration
-BorderWidth := 2          ; Thickness of the border in pixels
-Offset := -2              ; Configurable offset for additional gap
-BorderColor := "ffa83c"   ; Orange color for the border
-TransparencyLevel := 255  ; Set transparency level (255 = fully opaque)
+BorderWidth := 2              ; Thickness of the border in pixels
+Offset := -2                  ; Configurable offset for additional gap
+BorderColor := "ffa83c"       ; Border color in hexadecimal format (default: orange)
+TransparencyLevel := 255      ; Set transparency level (255 = fully opaque)
+DisableWhileDragging := true  ; Disable borders while dragging (default: true)
 
 ; List of Ignored Processes
 IgnoredProcesses := [
@@ -25,52 +26,80 @@ IgnoredWindowClasses := [
     "WorkerW"                       ; Ignore secondary desktop background window (behind desktop icons)
 ]
 
+; Declare global variables
+global moving := false
+global prevHwnd := 0
+
 ; Create the four border windows in an array
-borders := [CreateBorderWindow(), CreateBorderWindow(), CreateBorderWindow(), CreateBorderWindow()]
+borders := [
+    CreateBorderWindow(), CreateBorderWindow(),
+    CreateBorderWindow(), CreateBorderWindow()
+]
 
 ; Continuously update the border around the active window
 SetTimer(UpdateBorder, 100)
 
 ; Function to update the border around the active window
 UpdateBorder() {
+    global moving, prevHwnd, DisableWhileDragging  ; Access global variables
+
     try {
         hwnd := WinGetID("A")  ; Get the handle of the active window
     } catch {
-        HideBorders()  ; Hide borders if no active window is found
+        ResetState()
         return
     }
 
-    ; Get the process name and window class of the active window
-    ProcessName := GetProcessExeFromHwnd(hwnd)
-    WindowClass := WinGetClass("ahk_id " hwnd)
-
-    ; Skip the update if the active window is one of the border windows
+    ; Check if the active window is one of the border windows
     for border in borders {
         if hwnd = border.Hwnd {
-            HideBorders()  ; Hide borders if the active window is one of the border windows
+            ResetState()
             return
         }
     }
 
+    ; Get the process name and window class of the active window
+    ProcessName := GetProcessExeFromHwnd(hwnd)
+    WindowClass := WinGetClass(hwnd)
+
     ; Check if the process or window class is in the ignored list
     if IsProcessIgnored(ProcessName) || IsWindowClassIgnored(WindowClass) {
-        HideBorders()  ; Hide the borders if the window is ignored
+        ResetState()
         return
     }
 
     ; Use GetWindowRect for precise window boundaries
-    rect := Buffer(16)  ; Buffer for the RECT structure (4 * 4 bytes)
-    if !DllCall("GetWindowRect", "Ptr", hwnd, "Ptr", rect) {
-        HideBorders()  ; Hide the borders if unable to get the window rectangle
+    rect := GetWindowRect(hwnd)
+    if !rect {
+        ResetState()
         return
     }
 
-    x := NumGet(rect, 0, "Int")
-    y := NumGet(rect, 4, "Int")
-    w := NumGet(rect, 8, "Int") - x
-    h := NumGet(rect, 12, "Int") - y
+    x := rect.left
+    y := rect.top
+    w := rect.right - rect.left
+    h := rect.bottom - rect.top
 
-    ; Define variables for calculations with consistent naming
+    ; Movement detection
+    if DisableWhileDragging {
+        if hwnd != prevHwnd || !GetKeyState("LButton", "P") {
+            moving := false  ; Reset moving if the active window changes or mouse button is released
+        } else if x != prevX || y != prevY {
+            moving := true   ; Start moving
+        }
+    }
+
+    ; Update previous position
+    prevX := x
+    prevY := y
+    prevHwnd := hwnd
+
+    if moving {
+        HideBorders()
+        return
+    }
+
+    ; Calculate the positions and dimensions of the border windows
     xLeft := x + 7 - BorderWidth - Offset
     xRight := x + w - 7 + Offset
     yTop := y - BorderWidth - Offset
@@ -78,7 +107,7 @@ UpdateBorder() {
     width := (w - 14) + (BorderWidth * 2) + (Offset * 2)
     height := (h - 7) + (BorderWidth * 2) + (Offset * 2)
 
-    ; Move the borders accordingly
+    ; Move the border windows to the calculated positions
     borders[1].Move(xLeft, yTop, width, BorderWidth)    ; Top border
     borders[2].Move(xLeft, yBottom, width, BorderWidth) ; Bottom border
     borders[3].Move(xLeft, yTop, BorderWidth, height)   ; Left border
@@ -88,6 +117,18 @@ UpdateBorder() {
     for border in borders {
         border.Show("NoActivate")
     }
+}
+
+; Function to reset state and hide borders
+ResetState() {
+    global moving, prevHwnd
+
+    HideBorders()
+
+    moving := false
+    prevHwnd := 0
+
+    return
 }
 
 ; Function to hide the border windows
@@ -100,33 +141,39 @@ HideBorders() {
 ; Function to check if the process is ignored
 IsProcessIgnored(ProcessName) {
     global IgnoredProcesses
+
     for process in IgnoredProcesses {
-        if (ProcessName = process) {
+        if ProcessName = process {
             return true
         }
     }
+
     return false
 }
 
 ; Function to check if the window class is ignored
 IsWindowClassIgnored(WindowClass) {
     global IgnoredWindowClasses
+
     for class in IgnoredWindowClasses {
-        if (WindowClass = class) {
+        if WindowClass = class {
             return true
         }
     }
+
     return false
 }
 
 ; Function to get the process executable name from the window handle
 GetProcessExeFromHwnd(hwnd) {
-    ProcessID := WinGetPID("ahk_id " hwnd)
+    ProcessID := WinGetPID(hwnd)
+
     try {
         ProcessPath := ProcessGetPath(ProcessID)
     } catch {
         return ""
     }
+
     return StrSplit(ProcessPath, "\").Pop()
 }
 
@@ -140,6 +187,22 @@ CreateBorderWindow() {
     WinSetTransparent(TransparencyLevel, borderGui)
 
     return borderGui
+}
+
+; Function to get the window rectangle
+GetWindowRect(hwnd) {
+    rect := Buffer(16)
+
+    if !DllCall("GetWindowRect", "Ptr", hwnd, "Ptr", rect) {
+        return false
+    }
+
+    return {
+        left: NumGet(rect, 0, "Int"),
+        top: NumGet(rect, 4, "Int"),
+        right: NumGet(rect, 8, "Int"),
+        bottom: NumGet(rect, 12, "Int")
+    }
 }
 
 ; Keep the script running
