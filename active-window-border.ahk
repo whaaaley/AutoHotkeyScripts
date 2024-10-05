@@ -65,36 +65,35 @@ UpdateBorder() {
         return
     }
 
-    ; Extract x, y, w, h from the RECT structure
-    x := NumGet(rect, 0, "Int")  ; left
-    y := NumGet(rect, 4, "Int")  ; top
-    w := NumGet(rect, 8, "Int") - x  ; right - left = width
-    h := NumGet(rect, 12, "Int") - y  ; bottom - top = height
+    x := NumGet(rect, 0, "Int")
+    y := NumGet(rect, 4, "Int")
+    w := NumGet(rect, 8, "Int") - x
+    h := NumGet(rect, 12, "Int") - y
 
     ; Define variables for calculations with consistent naming
-    xLeft := x + 7 - BorderWidth - Offset  ; Left X position
-    xRight := x + w - 7 + Offset           ; Right X position
-    yTop := y - BorderWidth - Offset       ; Top Y position
-    yBottom := y + h - 7 + Offset          ; Bottom Y position
-    width := (w - 14) + (BorderWidth * 2) + (Offset * 2)   ; Width of top/bottom borders
-    height := (h - 7) + (BorderWidth * 2) + (Offset * 2)   ; Height of left/right borders
+    xLeft := x + 7 - BorderWidth - Offset
+    xRight := x + w - 7 + Offset
+    yTop := y - BorderWidth - Offset
+    yBottom := y + h - 7 + Offset
+    width := (w - 14) + (BorderWidth * 2) + (Offset * 2)
+    height := (h - 7) + (BorderWidth * 2) + (Offset * 2)
 
-    ; Move the borders accordingly using the pre-calculated variables
-    borders[1].Move(xLeft, yTop, width, BorderWidth)    ; Top border (horizontal)
-    borders[2].Move(xLeft, yBottom, width, BorderWidth) ; Bottom border (horizontal)
-    borders[3].Move(xLeft, yTop, BorderWidth, height)   ; Left border (vertical)
-    borders[4].Move(xRight, yTop, BorderWidth, height)  ; Right border (vertical)
+    ; Move the borders accordingly
+    borders[1].Move(xLeft, yTop, width, BorderWidth)    ; Top border
+    borders[2].Move(xLeft, yBottom, width, BorderWidth) ; Bottom border
+    borders[3].Move(xLeft, yTop, BorderWidth, height)   ; Left border
+    borders[4].Move(xRight, yTop, BorderWidth, height)  ; Right border
 
     ; Show the borders
     for border in borders {
-        border.Show("NoActivate")  ; Ensure borders don't steal focus
+        border.Show("NoActivate")
     }
 }
 
 ; Function to hide the border windows
 HideBorders() {
     for border in borders {
-        border.Hide()  ; Hide the border window
+        border.Hide()
     }
 }
 
@@ -122,24 +121,22 @@ IsWindowClassIgnored(WindowClass) {
 
 ; Function to get the process executable name from the window handle
 GetProcessExeFromHwnd(hwnd) {
-    ProcessID := WinGetPID("ahk_id " hwnd)  ; Get the Process ID from the window handle
+    ProcessID := WinGetPID("ahk_id " hwnd)
     try {
-        ProcessPath := ProcessGetPath(ProcessID)  ; Attempt to get the full path of the process executable
+        ProcessPath := ProcessGetPath(ProcessID)
     } catch {
-        return ""  ; Return an empty string if an error occurs
+        return ""
     }
-    return StrSplit(ProcessPath, "\").Pop()  ; Extract and return just the executable name
+    return StrSplit(ProcessPath, "\").Pop()
 }
 
 ; Function to create a single border window
 CreateBorderWindow() {
-    ; Create a transparent, click-through border window
-    borderGui := Gui("-Caption +ToolWindow +E0x20")  ; E0x20 for click-through (WS_EX_TRANSPARENT)
+    borderGui := Gui("-Caption +ToolWindow +E0x20")
     borderGui.BackColor := BorderColor
-    borderGui.Opt("+LastFound +AlwaysOnTop")  ; Set always-on-top once during creation
-    borderGui.Show("x0 y0 w100 h100 NoActivate")  ; Show window without activating it
+    borderGui.Opt("+LastFound +AlwaysOnTop")
+    borderGui.Show("x0 y0 w100 h100 NoActivate")
 
-    ; Apply transparency
     WinSetTransparent(TransparencyLevel, borderGui)
 
     return borderGui
