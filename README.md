@@ -73,7 +73,6 @@ This hotkey function is triggered by `Ctrl+Q`:
 - Retrieves the active window's title using `WinGetTitle`.
 - Displays a confirmation dialog using `MsgBox` with Yes and No buttons.
 - If the user selects **Yes**, the window is closed via `WinClose`.
-
 2. **`GetWindowTitle(hwnd)`**:
 This function retrieves the window title. If it can't access the title (e.g., due to elevated permissions or the window being untitled), it returns `"this window"` as a fallback.
 
@@ -91,36 +90,51 @@ The confirmation dialog will appear for elevated windows (e.g., those running wi
 
 ## monitor-padding.ahk
 
-This script creates 36px transparent padding on all sides (top, bottom, left, and right) of Monitor 1 and Monitor 2. It reserves 36px on all sides of each monitor separately, so maximized windows don’t overlap the padding. The script restores the original work areas upon exit and includes error handling.
+This script creates configurable transparent padding on all sides (top, bottom, left, and right) of two monitors. It reserves space on all sides of each monitor separately, so maximized windows don't overlap the padding. The script restores the original work areas upon exit and includes error handling.
 
 ### Features:
-- **Monitor Padding**: Creates transparent padding around the edges of multiple monitors.
-- **Work Area Management**: Adjusts the reserved work area so maximized windows don’t overlap the padding.
+- **Configurable Monitor Padding**: Creates transparent padding around the edges of two monitors with customizable sizes for each side.
+- **Work Area Management**: Adjusts the reserved work area so maximized windows don't overlap the padding.
 - **Restoration**: Automatically restores the original work area when the script exits.
-- **Supports Multi-Monitor Setup**: Allows configuring multiple monitors by manually specifying the size and position.
+- **Multi-Monitor Support**: Configures two monitors by manually specifying their size and position.
+- **Periodic Checks**: Regularly verifies and resets the work area if necessary.
 
 ### Configuration:
-- `BAR_SIZE`: Thickness of the padding in pixels. Default is `36px`.
-- **Monitor Configuration**: Manually define the position and size of each monitor by updating the `monitor1` and `monitor2` variables.
+- **Bar Sizes**: Customize padding size for each side of each monitor:
+bar1 := { top: 36, bottom: 36, left: 36, right: 36 }
+bar2 := { top: 36, bottom: 36, left: 36, right: 36 }
+- **Monitor Configuration**: Manually define the position and size of each monitor:
+monitor2 := { left: 0, top: 0, width: 2560, height: 1440 }     ; Primary Monitor (Monitor 2)
+monitor1 := { left: 2560, top: 0, width: 2560, height: 1440 }  ; Secondary Monitor (Monitor 1)
 
 ### Functions:
-1. **`CreateBarsForMonitor()`**:
-Creates transparent padding for all sides (top, bottom, left, and right) for a given monitor.
-
-2. **`ReserveWorkAreaForMonitor()`**:
-Adjusts the work area to reserve space for the transparent padding.
-
-3. **`ExitFunc()`**:
-When the script exits, this function restores the original work area and removes the transparent padding.
+1. **`createBarsForMonitor(monitor, barConfig)`**:
+Creates transparent padding for all sides of a monitor using the specific bar size configuration.
+2. **`createBar(x, y, w, h)`**:
+Creates a single transparent, click-through bar at the specified position and size.
+3. **`reserveWorkAreaForMonitor(monitor, barConfig)`**:
+Adjusts the work area to reserve space for the transparent padding on a specific monitor.
+4. **`checkAndResetWorkArea()`**:
+Periodically checks and resets the work area if it doesn't match the desired configuration.
+5. **`isWorkAreaCorrect(monitor, desiredWorkArea)`**:
+Checks if the current work area matches the desired work area for a monitor.
+6. **`setWorkArea(workArea)`**:
+Sets the work area to the specified configuration.
+7. **`restoreWorkArea(originalWorkArea, monitorName)`**:
+Restores the original work area for a specific monitor.
+8. **`destroyBars(bars)`**:
+Removes all created transparent bars.
+9. **`exitFunc(ExitReason, ExitCode)`**:
+Handles script exit by restoring original work areas and destroying bars.
 
 ### Usage:
 1. Ensure AutoHotkey v2.0 is installed.
-2. Adjust the monitor configuration according to your setup (position, width, height).
-3. Run the script to apply 36px transparent padding around all sides of your monitors.
-4. The original work area will be restored when the script exits.
+2. Adjust the bar size configuration and monitor configuration according to your setup.
+3. Run the script to apply the configured transparent padding around all sides of your monitors.
+4. The script will periodically check and reset the work area if necessary.
+5. The original work areas will be restored when the script exits.
 
 ### Known Issues:
-- **Delayed Work Area Update on Start**: The reserved work area (padding) will not update immediately. The update will typically happen after interacting with the desktop or moving a window.
 - **Manual Updates**: The script needs to be manually updated to reflect changes in monitor configurations if they differ from the pre-set values.
 
 ---
