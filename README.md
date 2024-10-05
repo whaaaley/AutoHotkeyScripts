@@ -13,7 +13,7 @@ This script adds a 2px orange square border around the active window with 100% o
 ### Features:
 - **Dynamic Border**: Automatically adjusts around the active window.
 - **Always on Top**: Ensures that the border remains visible above all other windows.
-- **Transparent and Click-Through**: Does not interfere with window interaction.
+- **Click-Through**: Does not interfere with window interaction.
 - **Ignored Processes/Windows**: Excludes specific processes and window classes from showing borders.
 
 ### Configuration:
