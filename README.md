@@ -9,7 +9,6 @@ My personal AHK scripts
 
 ## active-window-border.ahk
 
-**Description**:
 This script adds a 2px orange square border around the active window with 100% opacity. The border dynamically updates its size and position whenever the active window changes. The borders are completely click-through and always stay on top of other windows.
 
 ### Features:
@@ -55,7 +54,6 @@ Creates a transparent, click-through window that serves as the border.
 
 ## close-active-window.ahk
 
-**Description**:
 This script provides a hotkey (`Ctrl+Q`) that prompts the user with a confirmation dialog before closing the active window. It retrieves the window's title and displays it in the confirmation dialog. If the window title can't be retrieved, it defaults to a generic message.
 
 ### Features:
@@ -87,11 +85,10 @@ The confirmation dialog will appear for elevated windows (e.g., those running wi
 
 ## monitor-padding.ahk
 
-**Description**:
-This script creates 36px black padding on all sides (top, bottom, left, and right) of Monitor 1 and Monitor 2. It reserves 36px on all sides of each monitor separately, so maximized windows don’t overlap the padding. The script restores the original work areas upon exit and includes error handling.
+This script creates 36px transparent padding on all sides (top, bottom, left, and right) of Monitor 1 and Monitor 2. It reserves 36px on all sides of each monitor separately, so maximized windows don’t overlap the padding. The script restores the original work areas upon exit and includes error handling.
 
 ### Features:
-- **Monitor Padding**: Creates black padding around the edges of multiple monitors.
+- **Monitor Padding**: Creates transparent padding around the edges of multiple monitors.
 - **Work Area Management**: Adjusts the reserved work area so maximized windows don’t overlap the padding.
 - **Restoration**: Automatically restores the original work area when the script exits.
 - **Supports Multi-Monitor Setup**: Allows configuring multiple monitors by manually specifying the size and position.
@@ -102,18 +99,18 @@ This script creates 36px black padding on all sides (top, bottom, left, and righ
 
 ### Functions:
 1. **`CreateBarsForMonitor()`**:
-Creates black padding for all sides (top, bottom, left, and right) for a given monitor.
+Creates transparent padding for all sides (top, bottom, left, and right) for a given monitor.
 
 2. **`ReserveWorkAreaForMonitor()`**:
-Adjusts the work area to reserve space for the black padding.
+Adjusts the work area to reserve space for the transparent padding.
 
 3. **`ExitFunc()`**:
-When the script exits, this function restores the original work area and removes the black padding.
+When the script exits, this function restores the original work area and removes the transparent padding.
 
 ### Usage:
 1. Ensure AutoHotkey v2.0 is installed.
 2. Adjust the monitor configuration according to your setup (position, width, height).
-3. Run the script to apply 36px black padding around all sides of your monitors.
+3. Run the script to apply 36px transparent padding around all sides of your monitors.
 4. The original work area will be restored when the script exits.
 
 ### Known Issues:
@@ -124,7 +121,6 @@ When the script exits, this function restores the original work area and removes
 
 ## restore-work-area.ahk
 
-**Description**:
 This script restores the work area to encompass the full screen on all monitors by removing any reserved space (e.g., after padding or bars have been added). It automatically detects all monitors and restores their full-screen work area.
 
 ### Features:
