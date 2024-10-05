@@ -18,11 +18,11 @@ This script adds a configurable border around the active window. The border dyna
 - **Configurable**: Easily adjust border properties like width, color, and transparency.
 
 ### Configuration:
-BorderWidth := 2              ; Thickness of the border in pixels
-Offset := -2                  ; Configurable offset for additional gap
-BorderColor := "ffa83c"       ; Border color in hexadecimal format (default: orange)
-TransparencyLevel := 255      ; Set transparency level (255 = fully opaque)
-DisableWhileDragging := true  ; Disable borders while dragging (default: true)
+- BorderWidth := 2              ; Thickness of the border in pixels
+- Offset := -2                  ; Configurable offset for additional gap
+- BorderColor := "ffa83c"       ; Border color in hexadecimal format (default: orange)
+- TransparencyLevel := 255      ; Set transparency level (255 = fully opaque)
+- DisableWhileDragging := true  ; Disable borders while dragging (default: true)
 
 ### Ignored Processes and Window Classes:
 - **Ignored Processes**: Windows or applications that should not display the border. This includes processes like `Flow.Launcher.exe`, `ShellExperienceHost.exe`, and `Rainmeter.exe` by default.
@@ -31,25 +31,18 @@ DisableWhileDragging := true  ; Disable borders while dragging (default: true)
 ### Functions:
 1. **`UpdateBorder()`**:
 Continuously checks for changes in the active window and updates the border accordingly. Excludes processes and windows from the update if they belong to the ignored lists.
-
 2. **`ResetState()`**:
 Resets the state and hides the borders when no valid window is active or an ignored window is detected.
-
 3. **`HideBorders()`**:
 Hides all border windows.
-
 4. **`IsProcessIgnored(ProcessName)`**:
 Checks if the given process name is in the list of ignored processes.
-
 5. **`IsWindowClassIgnored(WindowClass)`**:
 Checks if the given window class is in the list of ignored window classes.
-
 6. **`GetProcessExeFromHwnd(hwnd)`**:
 Retrieves the executable name of the active window's process.
-
 7. **`CreateBorderWindow()`**:
 Creates a transparent, click-through window that serves as the border.
-
 8. **`GetWindowRect(hwnd)`**:
 Retrieves the exact dimensions of a window using the Windows API.
 
