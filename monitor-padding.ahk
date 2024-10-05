@@ -12,8 +12,17 @@ monitor1 := { left: 2560, top: 0, width: 2560, height: 1440 }  ; Secondary Monit
 barsMonitor1 := createBarsForMonitor(monitor1, bar1)
 barsMonitor2 := createBarsForMonitor(monitor2, bar2)
 
-originalWorkArea1 := reserveWorkAreaForMonitor(monitor1, bar1)
-originalWorkArea2 := reserveWorkAreaForMonitor(monitor2, bar2)
+; Reserve work areas and store the desired work areas
+result1 := reserveWorkAreaForMonitor(monitor1, bar1)
+originalWorkArea1 := result1.originalWorkArea
+desiredWorkArea1 := result1.desiredWorkArea
+
+result2 := reserveWorkAreaForMonitor(monitor2, bar2)
+originalWorkArea2 := result2.originalWorkArea
+desiredWorkArea2 := result2.desiredWorkArea
+
+; Start a timer to periodically check and reset the work area if necessary
+SetTimer(checkAndResetWorkArea, 100)
 
 ; Function to create bars on all sides of a monitor using the specific bar size configuration
 createBarsForMonitor(monitor, barConfig) {
@@ -63,20 +72,70 @@ reserveWorkAreaForMonitor(monitor, barConfig) {
     originalWorkArea := Buffer(16, 0)
     DllCall("RtlMoveMemory", "Ptr", originalWorkArea.Ptr, "Ptr", MONITORINFO.Ptr + 20, "UInt", 16)
 
-    ; Calculate the new work area
-    RECT := Buffer(16, 0)
-    NumPut("Int", NumGet(originalWorkArea, 0, "Int") + barConfig.left, RECT, 0)      ; left
-    NumPut("Int", NumGet(originalWorkArea, 4, "Int") + barConfig.top, RECT, 4)       ; top
-    NumPut("Int", NumGet(originalWorkArea, 8, "Int") - barConfig.right, RECT, 8)     ; right
-    NumPut("Int", NumGet(originalWorkArea, 12, "Int") - barConfig.bottom, RECT, 12)  ; bottom
+    ; Calculate the new (desired) work area
+    desiredWorkArea := Buffer(16, 0)
+    NumPut("Int", NumGet(originalWorkArea, 0, "Int") + barConfig.left, desiredWorkArea, 0)      ; left
+    NumPut("Int", NumGet(originalWorkArea, 4, "Int") + barConfig.top, desiredWorkArea, 4)       ; top
+    NumPut("Int", NumGet(originalWorkArea, 8, "Int") - barConfig.right, desiredWorkArea, 8)     ; right
+    NumPut("Int", NumGet(originalWorkArea, 12, "Int") - barConfig.bottom, desiredWorkArea, 12)  ; bottom
 
     ; Set the new work area
-    success := DllCall("SystemParametersInfo", "UInt", 0x002F, "UInt", 0, "Ptr", RECT.Ptr, "UInt", 0)  ; SPI_SETWORKAREA
+    success := DllCall("SystemParametersInfo", "UInt", 0x002F, "UInt", 0, "Ptr", desiredWorkArea.Ptr, "UInt", 0)  ; SPI_SETWORKAREA
     if !success {
         MsgBox("Error: Failed to set the new work area for the monitor.")
     }
 
-    return originalWorkArea  ; Return the original work area for restoration
+    ; Return both original and desired work areas
+    return { originalWorkArea: originalWorkArea, desiredWorkArea: desiredWorkArea }
+}
+
+; Function to check and reset the work area if necessary
+checkAndResetWorkArea() {
+    ; Check and reset work area for Monitor 1
+    if !isWorkAreaCorrect(monitor1, desiredWorkArea1) {
+        setWorkArea(desiredWorkArea1)
+    }
+
+    ; Check and reset work area for Monitor 2
+    if !isWorkAreaCorrect(monitor2, desiredWorkArea2) {
+        setWorkArea(desiredWorkArea2)
+    }
+}
+
+; Function to check if the current work area matches the desired work area for a monitor
+isWorkAreaCorrect(monitor, desiredWorkArea) {
+    ; Get the monitor handle from point
+    hMonitor := DllCall("MonitorFromPoint", "Int", monitor.left + 1, "Int", monitor.top + 1, "UInt", 2, "Ptr")
+    if !hMonitor {
+        return false
+    }
+
+    ; Prepare MONITORINFO structure
+    MONITORINFO := Buffer(40, 0)
+    NumPut("UInt", 40, MONITORINFO, 0)  ; cbSize = 40
+
+    ; Get monitor information
+    success := DllCall("GetMonitorInfo", "Ptr", hMonitor, "Ptr", MONITORINFO)
+    if !success {
+        return false
+    }
+
+    ; Retrieve the current work area
+    currentWorkArea := Buffer(16, 0)
+    DllCall("RtlMoveMemory", "Ptr", currentWorkArea.Ptr, "Ptr", MONITORINFO.Ptr + 20, "UInt", 16)
+
+    ; Compare current work area with desired work area
+    for offset in [0, 4, 8, 12] {
+        if NumGet(currentWorkArea, offset, "Int") != NumGet(desiredWorkArea, offset, "Int") {
+            return false
+        }
+    }
+    return true
+}
+
+; Function to set the work area
+setWorkArea(workArea) {
+    DllCall("SystemParametersInfo", "UInt", 0x002F, "UInt", 0, "Ptr", workArea.Ptr, "UInt", 0)  ; SPI_SETWORKAREA
 }
 
 ; Function to restore work area
