@@ -26,6 +26,14 @@ IgnoredWindowClasses := [
     "WorkerW"                       ; Ignore secondary desktop background window (behind desktop icons)
 ]
 
+; List of Processes to Skip Offsets
+SkipOffsetProcesses := [
+    "chatterino.exe",
+    "Discord.exe",
+    "Flow.Launcher.exe",
+    "GitHubDesktop.exe"
+]
+
 ; Declare global variables
 global moving := false
 global prevHwnd := 0
@@ -101,13 +109,24 @@ UpdateBorder() {
         return
     }
 
+    ; Check if the process should skip offsets
+    if IsProcessSkipOffset(ProcessName) {
+        AdjustLeft := 0
+        AdjustWidth := 0
+        AdjustBottom := 0
+    } else {
+        AdjustLeft := 7
+        AdjustWidth := 14
+        AdjustBottom := 7
+    }
+
     ; Calculate the positions and dimensions of the border windows
-    xLeft := x + 7 - BorderWidth - Offset
-    xRight := x + w - 7 + Offset
+    xLeft := x + AdjustLeft - BorderWidth - Offset
+    xRight := x + w - AdjustLeft + Offset
     yTop := y - BorderWidth - Offset
-    yBottom := y + h - 7 + Offset
-    width := (w - 14) + (BorderWidth * 2) + (Offset * 2)
-    height := (h - 7) + (BorderWidth * 2) + (Offset * 2)
+    yBottom := y + h - AdjustBottom + Offset
+    width := (w - AdjustWidth) + (BorderWidth * 2) + (Offset * 2)
+    height := (h - AdjustBottom) + (BorderWidth * 2) + (Offset * 2)
 
     ; Move the border windows to the calculated positions
     borders[1].Move(xLeft, yTop, width, BorderWidth)    ; Top border
@@ -147,7 +166,7 @@ IsProcessIgnored(ProcessName) {
     global IgnoredProcesses
 
     for process in IgnoredProcesses {
-        if ProcessName = process {
+        if StrLower(ProcessName) = process {
             return true
         }
     }
@@ -160,7 +179,20 @@ IsWindowClassIgnored(WindowClass) {
     global IgnoredWindowClasses
 
     for class in IgnoredWindowClasses {
-        if WindowClass = class {
+        if StrLower(WindowClass) = class {
+            return true
+        }
+    }
+
+    return false
+}
+
+; Function to check if the process should skip offsets
+IsProcessSkipOffset(ProcessName) {
+    global SkipOffsetProcesses
+
+    for process in SkipOffsetProcesses {
+        if StrLower(ProcessName) = process {
             return true
         }
     }
